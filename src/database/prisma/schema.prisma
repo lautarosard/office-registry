@@ -5,10 +5,50 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
 }
+
+//====================================================
+// ENTITIES
+//====================================================
+
+//USER
+model User {
+  id          String    @id @default(uuid())
+  username    String    @unique
+  name        String
+  password    String
+  rol         RoleUser @default(User)
+
+  // RELATIONSHIPS
+  Register  Register[]
+}
+
+//REGISTER
+model Register {
+  id          String    @id @default(uuid())
+  ex          String
+  doc_trabajo     String
+  motivo      String
+  reparticion String
+  pase        String
+  dia         DateTime
+  user        User      @relation(fields: [user_id], references: [id])
+  user_id     String
+
+}
+
+//====================================================
+// ENUMS
+//====================================================
+
+enum RoleUser {
+  User
+  Admin
+  SuperAdmin
+}
+
