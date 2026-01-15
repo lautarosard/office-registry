@@ -6,8 +6,9 @@ import { Controller } from './modules/records/api/controllers/.controller';
 import { Controller } from './modules/records/api/controllers/.controller';
 import { Controller } from './src/modules/records/api/controllers/.controller';
 import {PrismaModule} from './database/prisma/prisma.module'
+import { AuthModule } from './modules/auth/auth.module';
 @Module({
-  imports: [UserModule,RecordModule, PrismaModule],
+  imports: [UserModule,RecordModule, PrismaModule, AuthModule],
   controllers: [Controller],
   providers: [],
 })
