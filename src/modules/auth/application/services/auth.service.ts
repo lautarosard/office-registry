@@ -1,33 +1,38 @@
-import { IUserRepository} from '../../domain/iRepository/iuser.repository';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-
-import {LoginRequest} from '../models/requests/login.request';
-import {loginResponse} from '../models/responses/login.response';
-import {registerRequest} from '../models/requests/register.request';
-
+import { JwtService } from '@nestjs/jwt';
+import { IAuthService } from '../interfaces/iauth.service';
+@Injectable()
 export class AuthService implements IAuthService {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(
+    private readonly userRepo: UserRepository,
+    private readonly jwtService: JwtService,
+  ) {}
 
-  async login(data: LoginRequest): Promise<loginResponse> {
-    const user = await this.userRepository.findByEmail(data.email);
-    if (!user) {
-      throw new Error('User not found');
+  async login(dto: LoginRequestDto) {
+    const user = await this.userRepo.findByUsername(dto.username);
+
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException();
     }
-    const isPasswordValid = await bcrypt.compare(data.password, user.password);
-    if (!isPasswordValid) {
-      throw new Error('Invalid credentials');
+
+    const passwordOk = await bcrypt.compare(
+      dto.password,
+      user.password,
+    );
+
+    if (!passwordOk) {
+      throw new UnauthorizedException();
     }
-    const token = jwt.sign({ username: user.username }, 'secret');
+
+    const payload = {
+      sub: user.id,
+      role: user.role,
+    };
+
+    const accessToken = this.jwtService.sign(payload);
+
+    return {
+      accessToken,
+      mustChangePassword: user.mustChangePassword,
+    };
   }
-
-  async register(data: registerRequest): Promise<boolean> {
-    const user = await this.userRepository.findByEmail(data.email);
-    if (user) {
-      return false;
-    }
-    await this.userRepository.create(data);
-    return true;
-  }
-
 }

@@ -1,6 +1,4 @@
-export interface loginResponse {
-  user: {
-    username: string;
-  };
+export class loginResponse {
   token: string;
+  mustChanguePassword: boolean;
 }
