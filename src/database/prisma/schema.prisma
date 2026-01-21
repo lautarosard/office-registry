@@ -23,8 +23,9 @@ model User {
   username    String    @unique
   name        String
   password    String
-  rol         RoleUser @default(User)
+  rol         RoleUser  @default(User)
   isActive    Boolean   @default(true)
+  mustChanguePassword Boolean  @default(true)
   // RELATIONSHIPS
   Register  Register[]
 }

@@ -1,14 +1,14 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from './dto/create-user.dto';
-import { Role } from '../common/enums/role.enum';
-import { generateTempPassword } from './utils/password.util';
-import { UserRepository } from './user.repository';
+import { CreateUserDto } from '../models/requests/createUser.request';
+import { Role } from '../../../../common/enums/role.enum';
+import { generateTempPassword } from './../utils/password.util';
+import {PrismaUserRepository } from './../../infrastructure/persistance/user.repository';
 import { IUserService } from '../interfaces/iuser.service';
 
 @Injectable()
 export class UsersService implements IUserService{
-  constructor(private readonly userRepo: UserRepository) {}
+  constructor(private readonly userRepo: PrismaUserRepository) {}
 
   async createUser(dto: CreateUserDto) {
     const exists = await this.userRepo.findByUsername(dto.username);
@@ -22,16 +22,13 @@ export class UsersService implements IUserService{
 
     const user = await this.userRepo.create({
       username: dto.username,
-      password: hashedPassword,
-      role: dto.role,
-      isActive: true,
-      mustChangePassword: true,
+      password: hashedPassword
     });
 
     return {
       id: user.id,
       username: user.username,
-      role: user.role,
+      rol: user.rol,
       tempPassword, // devolver SOLO una vez
     };
   }

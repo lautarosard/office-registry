@@ -30,14 +30,15 @@ export class AuthService implements IAuthService {
 
     const payload = {
       sub: user.id,
-      role: user.role,
+      role: user.rol,
     };
 
     const accessToken = this.jwtService.sign(payload);
 
     return {
-      accessToken,
+      accessToken: accessToken,
       mustChangePassword: user.mustChangePassword,
+      
     };
   }
 }

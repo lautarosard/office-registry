@@ -1,52 +1,38 @@
-import {IUserRepository} from '../../domain/iRepository/iuser.repository';
-import {User} from '../../../../database/prisma/prisma.service';
-import {Injectable} from '@nestjs/common';
-import {Prisma} from '../../../../database/prisma/prisma.service';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../../../database/prisma/prisma.service';
+import { IUserRepository } from '../../domain/iRepository/iuser.repository';
+import { User } from '@prisma/client';
 
+@Injectable()
 export class PrismaUserRepository implements IUserRepository {
-  
-  /*
-   *Obtain all the Users
-   * */
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
   async getAll(): Promise<User[]> {
-    return await prisma.user.findMany();
+    return this.prisma.user.findMany();
   }
 
-  /*
-   *get the user by the username
-   * */
-  async findByUsername(username: string): Promise<User> {
-    return await prisma.user.findUnique({
-      where: {
-        username: username
-      }
+  async findByUsername(username: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { username },
     });
   }
-//create update delete
-  async create(data: Omit<User,'id'>): Promise<User> {
- 
-    return await prisma.user.create({
-      data: data
-    })
+
+  async create(data: Omit<User, 'id'>): Promise<User> {
+    return this.prisma.user.create({ data });
   }
 
-  async update(id:string, data:Partial<User>):Promise<User> {
-    return await prisma.user.update({
-      where: {
-        id: id
-      },
-      data: data
-    })
+  async update(id: string, data: Partial<User>): Promise<User> {
+    return this.prisma.user.update({
+      where: { id },
+      data,
+    });
   }
 
   async delete(id: string): Promise<User> {
-    return await prisma.user.delete({
-      where: {
-        id: id
-      }
-    })
+    return this.prisma.user.delete({
+      where: { id },
+    });
   }
-
-
-
 }
