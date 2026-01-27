@@ -25,7 +25,7 @@ model User {
   password    String
   rol         RoleUser  @default(User)
   isActive    Boolean   @default(true)
-  mustChanguePassword Boolean  @default(true)
+  mustChangePassword Boolean  @default(true)
   // RELATIONSHIPS
   Register  Register[]
 }

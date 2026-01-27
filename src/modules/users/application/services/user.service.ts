@@ -1,14 +1,15 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../models/requests/createUser.request';
-import { Role } from '../../../../common/enums/role.enum';
-import { generateTempPassword } from './../utils/password.util';
-import {PrismaUserRepository } from './../../infrastructure/persistance/user.repository';
+import { generateTempPassword } from '../utils/password.util';
 import { IUserService } from '../interfaces/iuser.service';
-
+import { IUserRepository } from '../../domain/iRepository/iuser.repository';
+import { UserResponse } from '../models/responses/user.response';
 @Injectable()
-export class UsersService implements IUserService{
-  constructor(private readonly userRepo: PrismaUserRepository) {}
+export class UsersService implements IUserService {
+  constructor(
+    private readonly userRepo: IUserRepository,
+  ) {}
 
   async createUser(dto: CreateUserDto) {
     const exists = await this.userRepo.findByUsername(dto.username);
@@ -22,14 +23,16 @@ export class UsersService implements IUserService{
 
     const user = await this.userRepo.create({
       username: dto.username,
-      password: hashedPassword
+      password: hashedPassword,
+      rol: dto.role,
+      name: dto.name,
     });
 
     return {
       id: user.id,
       username: user.username,
       rol: user.rol,
-      tempPassword, // devolver SOLO una vez
+      tempPassword, //  solo se devuelve una vez
     };
   }
 }
