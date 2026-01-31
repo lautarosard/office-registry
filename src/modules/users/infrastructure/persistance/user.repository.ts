@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { IUserRepository } from '../../domain/iRepository/iuser.repository';
 import { User } from '../../../../database/generated/prisma/client';
-
+import type{ CreateUserData } from '../../application/models/requests/createUserData.requets';
 @Injectable()
 export class PrismaUserRepository implements IUserRepository {
   constructor(
@@ -19,7 +19,7 @@ export class PrismaUserRepository implements IUserRepository {
     });
   }
 
-  async create(data: Omit<User, 'id'>): Promise<User> {
+  async create(data: CreateUserData): Promise<User> {
     return this.prisma.user.create({ data });
   }
 
