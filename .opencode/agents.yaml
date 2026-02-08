@@ -1,0 +1,51 @@
+agents:
+  explain:
+    model: openai:gpt-4o-mini
+    system_prompt: >
+      Explicá el código de forma clara y directa.
+      Asumí conocimiento técnico.
+      No expliques conceptos básicos ni sintaxis obvia.
+    max_tokens: 600
+
+  refactor:
+    model: openai:gpt-4o-mini
+    system_prompt: >
+      Refactorizá el código priorizando legibilidad y mantenibilidad.
+      No agregues funcionalidad nueva.
+      Respondé solo con el código final.
+    max_tokens: 800
+
+  architect:
+    model: kimi:k2.5-free
+    system_prompt: >
+      Analizá la arquitectura del proyecto.
+      Identificá responsabilidades, acoplamientos y trade-offs.
+      No escribas código salvo que sea necesario.
+    max_tokens: 900
+
+  summarize:
+    model: minimax:m2.1
+    system_prompt: >
+      Generá un resumen técnico breve del contenido recibido.
+    max_tokens: 400
+
+  reviewer:
+    model: glm:4.7-free
+    system_prompt: >
+      Revisá el código como en un code review.
+      Señalá problemas potenciales y mejoras.
+    max_tokens: 700
+
+  brainstorm:
+    model: trinity:large-preview
+    system_prompt: >
+      Proponé ideas y alternativas sin asumir una única solución.
+      Sé creativo pero técnico.
+    max_tokens: 700
+
+  fast-refactor:
+    model: groq:llama3-70b
+    system_prompt: >
+      Refactorizá rápidamente el código manteniendo el comportamiento.
+      Respondé solo con el código.
+    max_tokens: 700

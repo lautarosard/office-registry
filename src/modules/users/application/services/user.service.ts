@@ -2,8 +2,8 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../models/requests/createUser.request';
 import { generateTempPassword } from '../utils/password.util';
-import { IUserService } from '../interfaces/iuser.service';
 import { IUserRepository } from '../../domain/iRepository/iuser.repository';
+import { IUserService } from '../interfaces/iuser.service';
 import { UserResponse } from '../models/responses/user.response';
 @Injectable()
 export class UsersService implements IUserService {
@@ -31,8 +31,9 @@ export class UsersService implements IUserService {
     return {
       id: user.id,
       username: user.username,
+      name: user.name,
       rol: user.rol,
-      tempPassword, //  solo se devuelve una vez
+      tempPass: tempPassword, //  solo se devuelve una vez
     };
   }
 }

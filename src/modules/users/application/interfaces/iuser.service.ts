@@ -1,6 +1,5 @@
 import { CreateUserDto } from '../models/requests/createUser.request';
 import { UserResponse } from '../models/responses/user.response';
-import {CreateUserDto } from '../models/requests/createUser.request';
 export abstract class IUserService {
   abstract createUser(data: CreateUserDto): Promise<UserResponse>;
 }
