@@ -13,7 +13,10 @@ import { Role } from '../../../../common/enums/role.enum';
 
 import { IUserService } from '../../application/interfaces/iuser.service';
 import { CreateUserDto } from '../../application/models/requests/createUser.request';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Users')
+@ApiBearerAuth()
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
@@ -25,6 +28,9 @@ export class UsersController {
 
   @Post()
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Create user' })
+  @ApiResponse({ status: 201, description: 'User successfully created.' })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
   async create(@Body() createUserDto: CreateUserDto) {
     return this.userService.createUser(createUserDto);
   }
