@@ -1,4 +1,4 @@
-import {MaxLength, IsNotEmpty, IsString} from 'class-validator';
+import { MaxLength, IsNotEmpty, IsString } from 'class-validator';
 
 export class LoginRequest {
   @IsString()

@@ -1,10 +1,14 @@
-import { Controller, Post, Body } from '@nestjs/common';
-import { AuthService } from '../../application/services/auth.service';
+
+import { Controller, Post, Body, Inject } from '@nestjs/common';
+import { IAuthService } from '../../application/interfaces/iauth.service';
 import { LoginRequest } from '../../application/models/requests/login.request';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    @Inject(IAuthService)
+    private readonly authService: IAuthService,
+  ) { }
 
   @Post('login')
   async login(@Body() loginDto: LoginRequest) {

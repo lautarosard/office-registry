@@ -1,16 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { IUserRepository } from '../../domain/iRepository/iuser.repository';
-import { User } from '../../../../database/generated/prisma/client';
+import { User, RoleUser } from '@prisma/client';
 import type { CreateUserData } from '../../application/models/requests/createUserData.requets';
-import { RoleUser } from '../../../../database/generated/prisma/enums';
 import { Role } from '../../../../common/enums/role.enum';
 
 @Injectable()
 export class PrismaUserRepository implements IUserRepository {
-  constructor(
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // Mapeo de Role a RoleUser
   private mapRoleToPrisma(role: Role): RoleUser {
@@ -33,13 +30,13 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async create(data: CreateUserData): Promise<User> {
-    return this.prisma.user.create({ 
+    return this.prisma.user.create({
       data: {
         username: data.username,
         password: data.password,
         rol: this.mapRoleToPrisma(data.rol),
         name: data.name,
-      }
+      },
     });
   }
 
