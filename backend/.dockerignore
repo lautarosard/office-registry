@@ -1,0 +1,11 @@
+node_modules
+dist
+seed
+coverage
+test
+.env
+.env.*
+.agent
+.opencode
+*.log
+*.tsbuildinfo

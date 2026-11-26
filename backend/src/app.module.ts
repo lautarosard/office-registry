@@ -7,6 +7,7 @@ import { RecordsModule } from './modules/records/records.module';
 import { PrismaModule } from './database/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { envValidationSchema } from './config/env.validation';
+import { HealthController } from './health/health.controller';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { envValidationSchema } from './config/env.validation';
     AuthModule,
     RecordsModule,
   ],
+  controllers: [HealthController],
   providers: [{ provide: APP_FILTER, useClass: PrismaExceptionFilter }],
 })
 export class AppModule {}

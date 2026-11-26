@@ -1,0 +1,4 @@
+# Production secrets and database dumps (they contain every record).
+.env
+backups/
+*.dump

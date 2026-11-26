@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { ChangeEvent } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useId, type ChangeEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '../../../shared/components/Button';
 import { Input } from '../../../shared/components/Field';
@@ -15,6 +15,15 @@ const toInput = (form: RecordForm): RecordInput => ({
   ...form,
   forwarding: form.forwarding || null,
 });
+
+/** Native suggestions: the user picks one or keeps typing something new. */
+function Suggestions({ id, values }: { id: string; values?: string[] }) {
+  return (
+    <datalist id={id}>
+      {values?.map((value) => <option key={value} value={value} />)}
+    </datalist>
+  );
+}
 
 /** Upper-cases while typing without moving the cursor. */
 function upperCaseInPlace(input: HTMLInputElement) {
@@ -36,6 +45,12 @@ export function RecordFormModal({
   onSaved,
 }: RecordFormModalProps) {
   const queryClient = useQueryClient();
+  const listId = useId();
+  // Only a convenience: if it fails, the form works without suggestions.
+  const catalogs = useQuery({
+    queryKey: ['records', 'catalogs'],
+    queryFn: recordsApi.catalogs,
+  });
   const {
     register,
     handleSubmit,
@@ -116,20 +131,39 @@ export function RecordFormModal({
         <div className="sm:col-span-2">
           <Input
             label="Motivo"
+            list={`${listId}-subjects`}
+            autoComplete="off"
             error={errors.subject?.message}
             {...register('subject')}
           />
         </div>
         <Input
           label="Repartición"
+          list={`${listId}-departments`}
+          autoComplete="off"
           error={errors.department?.message}
           {...register('department')}
         />
         <Input
           label="Pase"
+          list={`${listId}-forwardings`}
+          autoComplete="off"
           hint="Opcional"
           error={errors.forwarding?.message}
           {...register('forwarding')}
+        />
+
+        <Suggestions
+          id={`${listId}-subjects`}
+          values={catalogs.data?.subjects}
+        />
+        <Suggestions
+          id={`${listId}-departments`}
+          values={catalogs.data?.departments}
+        />
+        <Suggestions
+          id={`${listId}-forwardings`}
+          values={catalogs.data?.forwardings}
         />
 
         <div className="sm:col-span-2">

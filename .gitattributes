@@ -1,0 +1,6 @@
+# These run on Linux: never convert them to CRLF, whatever core.autocrlf says.
+*.sh text eol=lf
+*.conf text eol=lf
+*.yml text eol=lf
+Dockerfile text eol=lf
+.env.example text eol=lf

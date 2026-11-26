@@ -1,5 +1,5 @@
-# Development database. Values are read from backend/.env (see .env.example).
-# Phase 3 replaces this with a root compose file (Postgres + API + Nginx).
+# DEVELOPMENT database only. Values are read from backend/.env.
+# Production is the root ../docker-compose.yml (a separate project and volume).
 name: office-registry
 
 services:

@@ -22,6 +22,8 @@ export const envValidationSchema = Joi.object({
   // Max attempts per IP within the window (login and change-password).
   LOGIN_THROTTLE_LIMIT: Joi.number().integer().min(1).default(5),
   LOGIN_THROTTLE_TTL_SECONDS: Joi.number().integer().min(1).default(60),
+  // See config/trust-proxy.ts. "true" would let clients forge their IP.
+  TRUST_PROXY: Joi.string().invalid('true').insensitive(),
   // Comma-separated list of allowed browser origins.
   CORS_ORIGIN: Joi.string().default('http://localhost:5173'),
 })
@@ -35,6 +37,7 @@ export interface EnvVars {
   JWT_SECRET: string;
   JWT_EXPIRES_IN: string;
   CORS_ORIGIN: string;
+  TRUST_PROXY?: string;
   LOGIN_THROTTLE_LIMIT: number;
   LOGIN_THROTTLE_TTL_SECONDS: number;
 }

@@ -43,4 +43,29 @@ describe('HTTP hardening, production mode (e2e)', () => {
     const res = await attempt().expect(429);
     expect(res.headers['retry-after']).toBeDefined();
   });
+
+  it('counts each client behind the proxy separately', async () => {
+    const from = (forwardedFor: string) =>
+      request(app.getHttpServer())
+        .post('/api/auth/login')
+        .set('X-Forwarded-For', forwardedFor)
+        .send({ username: 'nadie', password: 'incorrecta1' });
+
+    for (let i = 0; i < 3; i++) {
+      await from('192.168.1.10').expect(401);
+    }
+    await from('192.168.1.10').expect(429);
+    // Another PC is not affected.
+    await from('192.168.1.11').expect(401);
+    // Only the entry added by the proxy counts: a forged one doesn't help.
+    await from('203.0.113.9, 192.168.1.10').expect(429);
+  });
+
+  it('answers the container healthcheck without a token', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/api/health')
+      .expect(200);
+
+    expect(res.body).toEqual({ status: 'ok' });
+  });
 });

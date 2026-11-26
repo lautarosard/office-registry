@@ -43,3 +43,29 @@ export interface AuditEntry {
   after: Record<string, string | null> | null;
   performedBy: UserRef;
 }
+
+/** Values already in use, offered as autocomplete. */
+export interface Catalogs {
+  subjects: string[];
+  departments: string[];
+  forwardings: string[];
+}
+
+export type SpreadsheetFormat = 'xlsx' | 'csv';
+
+export type ExportFilters = Pick<RecordSearch, 'q' | 'from' | 'to'>;
+
+export interface ImportRowError {
+  row: number;
+  field: keyof RecordInput;
+  message: string;
+}
+
+export interface ImportReport {
+  totalRows: number;
+  validCount: number;
+  invalidCount: number;
+  duplicateCount: number;
+  errors: ImportRowError[];
+  importedCount: number;
+}

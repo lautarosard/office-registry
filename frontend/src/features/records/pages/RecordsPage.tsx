@@ -10,15 +10,17 @@ import { Pagination } from '../../../shared/components/Pagination';
 import { apiErrorMessage } from '../../../shared/utils/api-error';
 import { useDebouncedValue } from '../../../shared/utils/useDebouncedValue';
 import { useAuth } from '../../auth/hooks/useAuth';
+import { AdminToolbar } from '../components/AdminToolbar';
 import { AuditHistoryModal } from '../components/AuditHistoryModal';
 import { DeleteRecordDialog } from '../components/DeleteRecordDialog';
+import { ImportModal } from '../components/ImportModal';
 import { RecordFormModal } from '../components/RecordFormModal';
 import { RecordsTable, type RowAction } from '../components/RecordsTable';
 import { recordsApi } from '../records.api';
 import type { RecordItem } from '../types';
 
 type OpenModal =
-  | { type: 'create' }
+  | { type: 'create' | 'import' }
   | { type: RowAction; record: RecordItem }
   | null;
 
@@ -105,6 +107,13 @@ export const RecordsPage = () => {
         </Button>
       </div>
 
+      {user?.role === 'ADMIN' && (
+        <AdminToolbar
+          filters={{ q: search.trim(), from, to }}
+          onImport={() => open({ type: 'import' })}
+        />
+      )}
+
       {from && to && from > to && (
         <p role="alert" className="text-sm text-red-700">
           La fecha “Desde” es posterior a “Hasta”.
@@ -143,6 +152,9 @@ export const RecordsPage = () => {
 
       {modal?.type === 'create' && (
         <RecordFormModal onClose={closeModal} onSaved={finish} />
+      )}
+      {modal?.type === 'import' && (
+        <ImportModal onClose={closeModal} onImported={finish} />
       )}
       {modal?.type === 'edit' && (
         <RecordFormModal

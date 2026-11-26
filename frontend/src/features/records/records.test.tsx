@@ -27,6 +27,10 @@ vi.mock('./records.api', () => ({
     update: vi.fn(),
     remove: vi.fn(),
     history: vi.fn(),
+    catalogs: vi.fn(),
+    export: vi.fn(),
+    template: vi.fn(),
+    import: vi.fn(),
   },
 }));
 

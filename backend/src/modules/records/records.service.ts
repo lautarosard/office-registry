@@ -4,7 +4,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { AuditAction, Prisma, Role } from '@prisma/client';
-import { escapeLike } from '../../common/escape-like';
 import { paginated } from '../../common/pagination';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import type { AuthenticatedUser } from '../auth/application/strategies/jwt.strategy';
@@ -21,15 +20,11 @@ import {
   userRef,
   type RecordWithUsers,
 } from './record.mapper';
+import { recordOrder, recordWhere } from './record.filters';
 import { canModifyRecord } from './records.policy';
 
-const SEARCH_FIELDS = [
-  'ex',
-  'ifCode',
-  'subject',
-  'department',
-  'forwarding',
-] as const;
+/** Suggestions offered per catalog, most used first. */
+const CATALOG_LIMIT = 500;
 
 const notFound = () => new NotFoundException('El registro no existe.');
 
@@ -38,33 +33,52 @@ export class RecordsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async search(query: SearchRecordsQuery) {
-    const { q, from, to, page, pageSize } = query;
-    const where: Prisma.RecordWhereInput = {
-      deletedAt: null,
-      date: {
-        gte: from ? toDateColumn(from) : undefined,
-        lte: to ? toDateColumn(to) : undefined,
-      },
-      OR: q
-        ? SEARCH_FIELDS.map((field) => ({
-            [field]: { contains: escapeLike(q), mode: 'insensitive' },
-          }))
-        : undefined,
-    };
+    const { page, pageSize } = query;
+    const where = recordWhere(query);
 
     const [total, records] = await this.prisma.$transaction([
       this.prisma.record.count({ where }),
       this.prisma.record.findMany({
         where,
         include: recordInclude,
-        // `id` only makes the order stable between pages.
-        orderBy: [{ date: 'desc' }, { createdAt: 'desc' }, { id: 'desc' }],
+        orderBy: recordOrder,
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
     ]);
 
     return paginated(records.map(toRecordResponse), total, query);
+  }
+
+  /** Distinct values already in use, for the form's autocomplete. */
+  async catalogs() {
+    const active = { deletedAt: null };
+    const [subjects, departments, forwardings] = await Promise.all([
+      this.prisma.record.groupBy({
+        by: ['subject'],
+        where: active,
+        orderBy: [{ _count: { subject: 'desc' } }, { subject: 'asc' }],
+        take: CATALOG_LIMIT,
+      }),
+      this.prisma.record.groupBy({
+        by: ['department'],
+        where: active,
+        orderBy: [{ _count: { department: 'desc' } }, { department: 'asc' }],
+        take: CATALOG_LIMIT,
+      }),
+      this.prisma.record.groupBy({
+        by: ['forwarding'],
+        where: { ...active, forwarding: { not: null } },
+        orderBy: [{ _count: { forwarding: 'desc' } }, { forwarding: 'asc' }],
+        take: CATALOG_LIMIT,
+      }),
+    ]);
+
+    return {
+      subjects: subjects.map((row) => row.subject),
+      departments: departments.map((row) => row.department),
+      forwardings: forwardings.map((row) => row.forwarding as string),
+    };
   }
 
   async findOne(id: string) {
