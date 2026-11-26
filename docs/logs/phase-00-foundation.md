@@ -6,7 +6,7 @@
 | **Title** | Foundation: make the stack build, migrate, seed and log in end-to-end |
 | **Completed** | 2026-11-26 |
 | **Status** | `COMPLETED` |
-| **Base commit** | `281e791` (changes are uncommitted in the working tree) |
+| **Base commit** | `281e791` (committed as `560cd9f`) |
 
 ---
 

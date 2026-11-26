@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../../../shared/components/Button';
@@ -8,6 +8,9 @@ import { Input } from '../../../shared/components/Input';
 function loginErrorMessage(err: unknown): string {
   if (isAxiosError(err)) {
     if (err.response?.status === 401) return 'Usuario o contraseña incorrectos.';
+    if (err.response?.status === 429) {
+      return 'Demasiados intentos. Espere un momento e intente nuevamente.';
+    }
     if (!err.response) return 'No se pudo conectar con el servidor.';
   }
   return 'Ocurrió un error al iniciar sesión. Intente nuevamente.';
@@ -17,29 +20,34 @@ export const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, isLoading } = useAuth();
-  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { login, isAuthenticated } = useAuth();
   const location = useLocation();
 
   const from =
     (location.state as { from?: { pathname?: string } } | null)?.from
       ?.pathname || '/dashboard';
 
+  // Also covers a successful submit. ProtectedRoute then sends users with a
+  // pending password change to /change-password.
+  if (isAuthenticated) return <Navigate to={from} replace />;
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
 
+    setIsSubmitting(true);
     try {
       await login({ username: username.trim(), password });
-      navigate(from, { replace: true });
     } catch (err) {
       setError(loginErrorMessage(err));
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-      <h1 className="mt-2 text-center text-2xl font-bold tracking-wide text-gray-900">
+    <>
+      <h1 className="text-center text-2xl font-bold tracking-wide text-gray-900">
         INICIAR SESIÓN
       </h1>
 
@@ -75,11 +83,11 @@ export const LoginPage = () => {
         <Button
           type="submit"
           className="w-full"
-          disabled={isLoading || !username.trim() || !password}
+          disabled={isSubmitting || !username.trim() || !password}
         >
-          {isLoading ? 'Ingresando…' : 'Ingresar'}
+          {isSubmitting ? 'Ingresando…' : 'Ingresar'}
         </Button>
       </form>
-    </div>
+    </>
   );
 };

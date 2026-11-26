@@ -18,7 +18,10 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../../auth/application/strategies/jwt.strategy';
 
+// Authentication is enforced by the global JwtAuthGuard (see AuthModule).
 @ApiTags('Records')
 @ApiBearerAuth()
 @Controller('records')
@@ -37,8 +40,9 @@ export class RecordController {
   })
   async create(
     @Body() createRecordDto: CreateRecordRequest,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<RecordResponse> {
-    return this.recordService.createRecord(createRecordDto);
+    return this.recordService.createRecord(createRecordDto, user.userId);
   }
 
   @Get()

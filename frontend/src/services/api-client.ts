@@ -27,6 +27,14 @@ api.interceptors.response.use(
       storage.clearToken();
       window.location.href = '/login';
     }
+    // The password was reset while the session was open: go change it.
+    if (
+      error.response?.status === 403 &&
+      error.response.data?.code === 'PASSWORD_CHANGE_REQUIRED' &&
+      window.location.pathname !== '/change-password'
+    ) {
+      window.location.href = '/change-password';
+    }
     return Promise.reject(error);
   },
 );

@@ -8,12 +8,13 @@ import { CreateRecordRequest } from '../../application/models/requests/create-re
 export class PrismaRecordRepository implements IRecordRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: CreateRecordRequest): Promise<Register> {
+  async create(data: CreateRecordRequest, authorId: string): Promise<Register> {
     const { dia, ...rest } = data;
     return this.prisma.register.create({
       data: {
         ...rest,
         dia: new Date(dia),
+        user_id: authorId,
       },
     });
   }

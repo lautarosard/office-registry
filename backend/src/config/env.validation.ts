@@ -19,6 +19,9 @@ export const envValidationSchema = Joi.object({
   JWT_EXPIRES_IN: Joi.string()
     .pattern(/^\d+\s?(ms|s|m|h|d|w|y)$/i)
     .default('1d'),
+  // Max attempts per IP within the window (login and change-password).
+  LOGIN_THROTTLE_LIMIT: Joi.number().integer().min(1).default(5),
+  LOGIN_THROTTLE_TTL_SECONDS: Joi.number().integer().min(1).default(60),
   // Comma-separated list of allowed browser origins.
   CORS_ORIGIN: Joi.string().default('http://localhost:5173'),
 })
@@ -32,4 +35,6 @@ export interface EnvVars {
   JWT_SECRET: string;
   JWT_EXPIRES_IN: string;
   CORS_ORIGIN: string;
+  LOGIN_THROTTLE_LIMIT: number;
+  LOGIN_THROTTLE_TTL_SECONDS: number;
 }

@@ -1,6 +1,5 @@
 import { Controller, Post, Body, UseGuards, Inject } from '@nestjs/common';
 
-import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../../common/guards/roles.guard';
 import { Roles } from '../../../../common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
@@ -17,7 +16,8 @@ import {
 @ApiTags('Users')
 @ApiBearerAuth()
 @Controller('users')
-@UseGuards(JwtAuthGuard, RolesGuard)
+// Authentication is enforced by the global JwtAuthGuard.
+@UseGuards(RolesGuard)
 export class UsersController {
   constructor(
     @Inject(IUserService)

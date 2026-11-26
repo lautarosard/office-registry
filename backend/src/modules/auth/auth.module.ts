@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { JwtModule, type JwtSignOptions } from '@nestjs/jwt';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthService } from './application/services/auth.service';
 import { AuthController } from './api/controllers/auth.controller';
 import { UserModule } from '../users/users.module';
 import { JwtStrategy } from './application/strategies/jwt.strategy';
-import { IAuthService } from './application/interfaces/iauth.service';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { MustChangePasswordGuard } from '../../common/guards/must-change-password.guard';
 import type { EnvVars } from '../../config/env.validation';
 
 @Module({
@@ -23,13 +26,28 @@ import type { EnvVars } from '../../config/env.validation';
         },
       }),
     }),
+    // Only applies where ThrottlerGuard is used (login, change-password).
+    ThrottlerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService<EnvVars, true>) => ({
+        errorMessage:
+          'Demasiados intentos. Espere un momento e intente nuevamente.',
+        throttlers: [
+          {
+            ttl:
+              config.get('LOGIN_THROTTLE_TTL_SECONDS', { infer: true }) * 1000,
+            limit: config.get('LOGIN_THROTTLE_LIMIT', { infer: true }),
+          },
+        ],
+      }),
+    }),
   ],
   providers: [
-    {
-      provide: IAuthService,
-      useClass: AuthService,
-    },
+    AuthService,
     JwtStrategy,
+    // Global guards run in this order: authenticate, then check the flag.
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: MustChangePasswordGuard },
   ],
   controllers: [AuthController],
 })

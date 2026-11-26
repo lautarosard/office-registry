@@ -10,8 +10,11 @@ import { RecordResponse } from '../models/responses/record.response';
 export class RecordService implements IRecordService {
   constructor(private readonly recordRepository: IRecordRepository) {}
 
-  async createRecord(data: CreateRecordRequest): Promise<RecordResponse> {
-    const record = await this.recordRepository.create(data);
+  async createRecord(
+    data: CreateRecordRequest,
+    authorId: string,
+  ): Promise<RecordResponse> {
+    const record = await this.recordRepository.create(data, authorId);
     return new RecordResponse(record);
   }
 

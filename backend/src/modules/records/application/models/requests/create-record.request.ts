@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsDateString, IsUUID } from 'class-validator';
+import { IsString, IsNotEmpty, IsDateString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateRecordRequest {
@@ -31,9 +31,4 @@ export class CreateRecordRequest {
   @IsDateString()
   @IsNotEmpty()
   dia: string;
-
-  @ApiProperty()
-  @IsUUID()
-  @IsNotEmpty()
-  user_id: string;
 }

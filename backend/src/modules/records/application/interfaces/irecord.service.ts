@@ -3,7 +3,10 @@ import { UpdateRecordRequest } from '../models/requests/update-record.request';
 import { RecordResponse } from '../models/responses/record.response';
 
 export abstract class IRecordService {
-  abstract createRecord(data: CreateRecordRequest): Promise<RecordResponse>;
+  abstract createRecord(
+    data: CreateRecordRequest,
+    authorId: string,
+  ): Promise<RecordResponse>;
   abstract getAllRecords(): Promise<RecordResponse[]>;
   abstract getRecordById(id: string): Promise<RecordResponse>;
   abstract updateRecord(

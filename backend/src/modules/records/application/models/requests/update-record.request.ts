@@ -1,4 +1,4 @@
-import { IsString, IsDateString, IsUUID, IsOptional } from 'class-validator';
+import { IsString, IsDateString, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateRecordRequest {
@@ -31,9 +31,4 @@ export class UpdateRecordRequest {
   @IsDateString()
   @IsOptional()
   dia?: string;
-
-  @ApiProperty({ required: false })
-  @IsUUID()
-  @IsOptional()
-  user_id?: string;
 }
