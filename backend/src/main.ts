@@ -1,11 +1,23 @@
-import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AppModule } from './app.module';
+import type { EnvVars } from './config/env.validation';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const config = app.get(ConfigService<EnvVars, true>);
+
+  app.setGlobalPrefix('api');
+
+  app.enableCors({
+    origin: config
+      .get('CORS_ORIGIN', { infer: true })
+      .split(',')
+      .map((o) => o.trim())
+      .filter(Boolean),
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -15,16 +27,16 @@ async function bootstrap() {
     }),
   );
 
-  const config = new DocumentBuilder()
-    .setTitle('Sheet Register API')
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Office Registry API')
     .setDescription('Internal Police Office API')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api/docs', app, document);
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
-
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(config.get('PORT', { infer: true }));
 }
-bootstrap();
+
+void bootstrap();

@@ -1,0 +1,52 @@
+// Prisma schema — Office Registry
+// Default location (prisma/schema.prisma) so `prisma migrate` / `prisma db seed`
+// work without --schema flags. Migrations live in prisma/migrations.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//====================================================
+// ENUMS
+//====================================================
+
+// Single source of truth for roles (backend imports `Role` from @prisma/client).
+enum Role {
+  USER
+  ADMIN
+}
+
+//====================================================
+// ENTITIES
+//====================================================
+
+model User {
+  id                 String     @id @default(uuid())
+  username           String     @unique
+  name               String
+  password           String
+  role               Role       @default(USER)
+  isActive           Boolean    @default(true)
+  mustChangePassword Boolean    @default(true)
+  // RELATIONSHIPS
+  Register           Register[]
+}
+
+// NOTE: field names/shape are intentionally unchanged in Phase 0.
+// Phase 2 reshapes this into the `Record` model defined in CLAUDE.md §3.1.
+model Register {
+  id          String   @id @default(uuid())
+  ex          String
+  if_code     String
+  motivo      String
+  reparticion String
+  pase        String
+  dia         DateTime
+  user        User     @relation(fields: [user_id], references: [id])
+  user_id     String
+}

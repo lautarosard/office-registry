@@ -9,7 +9,7 @@ export class AuthController {
   constructor(
     @Inject(IAuthService)
     private readonly authService: IAuthService,
-  ) { }
+  ) {}
 
   @Post('login')
   @ApiOperation({ summary: 'Login user' })

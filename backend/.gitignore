@@ -41,6 +41,7 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+!.env.example
 
 # temp directory
 .temp
@@ -55,4 +56,8 @@ pids
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-/generated/prisma
+# Prisma: the client is generated into node_modules by `prisma generate`.
+# Never commit generated clients (a stale copy lived in src/database/generated).
+/generated/
+/src/database/generated/
+/prisma/generated/

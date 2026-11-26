@@ -1,25 +1,31 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
+import { Role } from '@prisma/client';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { Role } from '../../../../common/enums/role.enum';
+import type { EnvVars } from '../../../../config/env.validation';
 
-interface JwtPayload {
+export interface JwtPayload {
   sub: string;
+  role: Role;
+}
+
+export interface AuthenticatedUser {
+  userId: string;
   role: Role;
 }
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  constructor(config: ConfigService<EnvVars, true>) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'dev_secret',
+      secretOrKey: config.get('JWT_SECRET', { infer: true }),
     });
   }
 
-  validate(payload: JwtPayload) {
+  validate(payload: JwtPayload): AuthenticatedUser {
     return {
       userId: payload.sub,
       role: payload.role,

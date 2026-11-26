@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "RoleUser" AS ENUM ('User', 'Admin', 'SuperAdmin');
+CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -7,7 +7,9 @@ CREATE TABLE "User" (
     "username" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "rol" "RoleUser" NOT NULL DEFAULT 'User',
+    "role" "Role" NOT NULL DEFAULT 'USER',
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "mustChangePassword" BOOLEAN NOT NULL DEFAULT true,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -16,7 +18,7 @@ CREATE TABLE "User" (
 CREATE TABLE "Register" (
     "id" TEXT NOT NULL,
     "ex" TEXT NOT NULL,
-    "doc_trabajo" TEXT NOT NULL,
+    "if_code" TEXT NOT NULL,
     "motivo" TEXT NOT NULL,
     "reparticion" TEXT NOT NULL,
     "pase" TEXT NOT NULL,

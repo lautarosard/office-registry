@@ -28,7 +28,7 @@ export class AuthService implements IAuthService {
 
     const payload = {
       sub: user.id,
-      role: user.rol,
+      role: user.role,
     };
 
     const accessToken = this.jwtService.sign(payload);

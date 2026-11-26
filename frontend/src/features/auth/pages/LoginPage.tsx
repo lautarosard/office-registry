@@ -1,75 +1,85 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { isAxiosError } from 'axios';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../../../shared/components/Button';
 import { Input } from '../../../shared/components/Input';
 
+function loginErrorMessage(err: unknown): string {
+  if (isAxiosError(err)) {
+    if (err.response?.status === 401) return 'Usuario o contraseña incorrectos.';
+    if (!err.response) return 'No se pudo conectar con el servidor.';
+  }
+  return 'Ocurrió un error al iniciar sesión. Intente nuevamente.';
+}
+
 export const LoginPage = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const { login } = useAuth();
-    const navigate = useNavigate();
-    const location = useLocation();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const { login, isLoading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const from = location.state?.from?.pathname || '/dashboard';
+  const from =
+    (location.state as { from?: { pathname?: string } } | null)?.from
+      ?.pathname || '/dashboard';
 
-    const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-        setError('');
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError('');
 
-        try {
-            await login({ email, password });
-            navigate(from, { replace: true });
-        } catch (err) {
-            setError('Invalid email or password');
-            console.error(err);
-        }
-    };
+    try {
+      await login({ username: username.trim(), password });
+      navigate(from, { replace: true });
+    } catch (err) {
+      setError(loginErrorMessage(err));
+    }
+  };
 
-    return (
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Sign in to your account
-                </h2>
-            </div>
+  return (
+    <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <h1 className="mt-2 text-center text-2xl font-bold tracking-wide text-gray-900">
+        INICIAR SESIÓN
+      </h1>
 
-            <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    label="Email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
+      <form className="mt-8 space-y-6" onSubmit={handleSubmit} noValidate>
+        <Input
+          id="username"
+          name="username"
+          type="text"
+          autoComplete="username"
+          required
+          label="Usuario"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
 
-                <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    label="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          required
+          label="Contraseña"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-                {error && (
-                    <div className="text-sm text-red-600">
-                        {error}
-                    </div>
-                )}
+        {error && (
+          <p role="alert" className="text-sm text-red-700">
+            {error}
+          </p>
+        )}
 
-                <div>
-                    <Button type="submit" className="w-full">
-                        Sign in
-                    </Button>
-                </div>
-            </form>
-        </div>
-    );
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isLoading || !username.trim() || !password}
+        >
+          {isLoading ? 'Ingresando…' : 'Ingresar'}
+        </Button>
+      </form>
+    </div>
+  );
 };

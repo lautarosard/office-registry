@@ -19,4 +19,4 @@ import { PrismaRecordRepository } from './infrastructure/persistance/prisma-reco
   ],
   exports: [IRecordService, IRecordRepository],
 })
-export class RecordModule { }
+export class RecordModule {}

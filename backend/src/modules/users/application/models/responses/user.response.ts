@@ -1,9 +1,9 @@
-import { Role } from '../../../../../common/enums/role.enum';
+import type { Role } from '@prisma/client';
 
 export interface UserResponse {
   id: string;
   username: string;
   name: string;
-  rol: Role;
+  role: Role;
   tempPass: string;
 }

@@ -4,13 +4,13 @@ import { CreateUserDto } from '../models/requests/createUser.request';
 import { generateTempPassword } from '../utils/password.util';
 import { IUserRepository } from '../../domain/iRepository/iuser.repository';
 import { IUserService } from '../interfaces/iuser.service';
-import { Role } from '../../../../common/enums/role.enum';
+import { UserResponse } from '../models/responses/user.response';
 
 @Injectable()
 export class UsersService implements IUserService {
   constructor(private readonly userRepo: IUserRepository) {}
 
-  async createUser(dto: CreateUserDto) {
+  async createUser(dto: CreateUserDto): Promise<UserResponse> {
     const exists = await this.userRepo.findByUsername(dto.username);
 
     if (exists) {
@@ -23,7 +23,7 @@ export class UsersService implements IUserService {
     const user = await this.userRepo.create({
       username: dto.username,
       password: hashedPassword,
-      rol: dto.role,
+      role: dto.role,
       name: dto.name,
     });
 
@@ -31,7 +31,7 @@ export class UsersService implements IUserService {
       id: user.id,
       username: user.username,
       name: user.name,
-      rol: user.rol.toUpperCase() as Role,
+      role: user.role,
       tempPass: tempPassword, //  solo se devuelve una vez
     };
   }

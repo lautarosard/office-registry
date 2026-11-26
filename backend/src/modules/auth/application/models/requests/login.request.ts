@@ -8,7 +8,10 @@ export class LoginRequest {
   @MaxLength(128)
   username: string;
 
-  @ApiProperty({ example: 'secretpassword', description: 'The password of the user' })
+  @ApiProperty({
+    example: 'secretpassword',
+    description: 'The password of the user',
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(128)

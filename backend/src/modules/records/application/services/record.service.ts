@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import type { Register } from '@prisma/client';
 import { IRecordService } from '../interfaces/irecord.service';
 import { IRecordRepository } from '../../domain/iRepository/irecord.repository';
 import { CreateRecordRequest } from '../models/requests/create-record.request';
@@ -7,7 +8,7 @@ import { RecordResponse } from '../models/responses/record.response';
 
 @Injectable()
 export class RecordService implements IRecordService {
-  constructor(private readonly recordRepository: IRecordRepository) { }
+  constructor(private readonly recordRepository: IRecordRepository) {}
 
   async createRecord(data: CreateRecordRequest): Promise<RecordResponse> {
     const record = await this.recordRepository.create(data);
@@ -27,15 +28,19 @@ export class RecordService implements IRecordService {
     return new RecordResponse(record);
   }
 
-  async updateRecord(id: string, data: UpdateRecordRequest): Promise<RecordResponse> {
+  async updateRecord(
+    id: string,
+    data: UpdateRecordRequest,
+  ): Promise<RecordResponse> {
     // Check if exists first
     await this.getRecordById(id);
 
-    // Map DTO to Partial<Register> manually
-    const updateData: any = { ...data };
-    if (data.dia) {
-      updateData.dia = new Date(data.dia);
-    }
+    // Map DTO to Partial<Register>: `dia` arrives as an ISO string.
+    const { dia, ...rest } = data;
+    const updateData: Partial<Register> = {
+      ...rest,
+      ...(dia ? { dia: new Date(dia) } : {}),
+    };
 
     const updatedRecord = await this.recordRepository.update(id, updateData);
     return new RecordResponse(updatedRecord);
