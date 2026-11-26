@@ -17,7 +17,7 @@ export type Role = 'USER' | 'ADMIN';
 export interface User {
   id: string;
   username: string;
-  name: string;
+  fullName: string;
   role: Role;
   isActive: boolean;
   mustChangePassword: boolean;

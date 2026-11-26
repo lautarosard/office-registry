@@ -7,7 +7,7 @@ export class MeResponse {
   @ApiProperty()
   username: string;
   @ApiProperty()
-  name: string;
+  fullName: string;
   @ApiProperty({ enum: Role })
   role: Role;
   @ApiProperty()

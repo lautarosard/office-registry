@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
  *
  *   SEED_ADMIN_USERNAME              (default: "admin")
  *   SEED_ADMIN_NAME                  (default: "Administrador")
+ *   SEED_ADMIN_DNI                   (default: "00000000", 7-8 digits)
  *   SEED_ADMIN_PASSWORD              (required)
  *   SEED_ADMIN_MUST_CHANGE_PASSWORD  (default: "true")
  */
@@ -15,7 +16,11 @@ const prisma = new PrismaClient();
 
 async function main() {
   const username = process.env.SEED_ADMIN_USERNAME?.trim() || 'admin';
-  const name = process.env.SEED_ADMIN_NAME?.trim() || 'Administrador';
+  const fullName = process.env.SEED_ADMIN_NAME?.trim() || 'Administrador';
+  const dni = (process.env.SEED_ADMIN_DNI?.trim() || '00000000').replace(
+    /[.\s]/g,
+    '',
+  );
   const password = process.env.SEED_ADMIN_PASSWORD;
   const mustChangePassword =
     (process.env.SEED_ADMIN_MUST_CHANGE_PASSWORD ?? 'true').toLowerCase() !==
@@ -27,6 +32,10 @@ async function main() {
     );
   }
 
+  if (!/^\d{7,8}$/.test(dni)) {
+    throw new Error('SEED_ADMIN_DNI must have 7 or 8 digits.');
+  }
+
   const existing = await prisma.user.findUnique({ where: { username } });
   if (existing) {
     console.log(`Seed: user "${username}" already exists, skipping.`);
@@ -35,8 +44,9 @@ async function main() {
 
   await prisma.user.create({
     data: {
+      dni,
       username,
-      name,
+      fullName,
       password: await bcrypt.hash(password, 10),
       role: Role.ADMIN,
       isActive: true,

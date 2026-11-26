@@ -1,14 +1,23 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import type { Role } from '../features/auth/types';
 import { Button } from '../shared/components/Button';
+import { Logo } from '../shared/components/Logo';
+import { cn } from '../shared/utils/cn';
 
 const ROLE_LABELS: Record<Role, string> = {
   ADMIN: 'Administrador',
   USER: 'Usuario',
 };
 
-// Header only. Phase 2 adds the badge and role-based navigation of docs/mock/.
+const navClass = ({ isActive }: { isActive: boolean }) =>
+  cn(
+    'border-b-2 py-1 text-lg font-bold tracking-wide uppercase focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none',
+    isActive
+      ? 'border-gold text-white'
+      : 'border-transparent text-gray-300 hover:text-white',
+  );
+
 export const PrivateLayout = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -21,15 +30,24 @@ export const PrivateLayout = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="border-b-4 border-gold bg-linear-to-b from-navy-800 to-navy-900 text-white">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
-          <span className="text-xl font-bold tracking-wide uppercase">
-            Registro de Expedientes
-          </span>
+        <div className="mx-auto flex max-w-[100rem] flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-6">
+          <Logo />
+
+          <nav aria-label="Principal" className="flex gap-10">
+            <NavLink to="/expedientes" className={navClass}>
+              Expedientes
+            </NavLink>
+            {user?.role === 'ADMIN' && (
+              <NavLink to="/usuarios" className={navClass}>
+                Usuarios
+              </NavLink>
+            )}
+          </nav>
 
           <div className="flex flex-wrap items-center gap-4">
             {user && (
               <p className="text-right text-sm leading-tight">
-                <span className="block font-semibold">{user.name}</span>
+                <span className="block font-semibold">{user.fullName}</span>
                 <span className="block text-gray-300">
                   {ROLE_LABELS[user.role]}
                 </span>
@@ -53,7 +71,7 @@ export const PrivateLayout = () => {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-[100rem] px-4 py-6 sm:px-6">
         <Outlet />
       </main>
     </div>

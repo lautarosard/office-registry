@@ -23,7 +23,12 @@ api.interceptors.response.use(
     // A 401 from the login call means "bad credentials": let the form show it
     // instead of reloading the page. Any other 401 means the session expired.
     const isLoginCall = error.config?.url?.endsWith('/auth/login');
-    if (error.response?.status === 401 && !isLoginCall) {
+    // Changing the password revokes the previous token. A request that was
+    // still using it must not sign out the session that has the new one.
+    const token = storage.getToken();
+    const sentCurrentToken =
+      !token || error.config?.headers?.Authorization === `Bearer ${token}`;
+    if (error.response?.status === 401 && !isLoginCall && sentCurrentToken) {
       storage.clearToken();
       window.location.href = '/login';
     }

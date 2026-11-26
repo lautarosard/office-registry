@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ChangePasswordPage } from '../features/auth/pages/ChangePasswordPage';
 import { LoginPage } from '../features/auth/pages/LoginPage';
-import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
+import { RecordsPage } from '../features/records/pages/RecordsPage';
+import { UsersPage } from '../features/users/pages/UsersPage';
 import { PublicLayout } from '../layouts/PublicLayout';
 import { PrivateLayout } from '../layouts/PrivateLayout';
+import { AdminRoute } from './AdminRoute';
 import { ProtectedRoute } from './ProtectedRoute';
 
 export const AppRouter = () => {
@@ -20,11 +22,14 @@ export const AppRouter = () => {
             <Route path="/change-password" element={<ChangePasswordPage />} />
           </Route>
           <Route element={<PrivateLayout />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/expedientes" element={<RecordsPage />} />
+            <Route element={<AdminRoute />}>
+              <Route path="/usuarios" element={<UsersPage />} />
+            </Route>
           </Route>
         </Route>
 
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/expedientes" replace />} />
       </Routes>
     </BrowserRouter>
   );

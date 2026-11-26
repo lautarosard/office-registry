@@ -4,18 +4,18 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Role } from '@prisma/client';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import type { EnvVars } from '../../../../config/env.validation';
-import { IUserRepository } from '../../../users/domain/iRepository/iuser.repository';
+import { PrismaService } from '../../../../database/prisma/prisma.service';
 
 export interface JwtPayload {
   sub: string;
-  role: Role;
-  mustChangePassword: boolean;
+  /** Must match User.tokenVersion, otherwise the token has been revoked. */
+  ver: number;
 }
 
 export interface AuthenticatedUser {
   userId: string;
   username: string;
-  name: string;
+  fullName: string;
   role: Role;
   isActive: boolean;
   mustChangePassword: boolean;
@@ -25,7 +25,7 @@ export interface AuthenticatedUser {
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     config: ConfigService<EnvVars, true>,
-    private readonly userRepo: IUserRepository,
+    private readonly prisma: PrismaService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -36,26 +36,24 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   /**
    * Runs on every authenticated request. The user is re-read from the DB so
-   * deactivation, deletion and role changes apply immediately.
+   * deactivation, role changes and password changes apply immediately.
    */
   async validate(payload: JwtPayload): Promise<AuthenticatedUser> {
-    const user = await this.userRepo.findById(payload.sub);
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+    });
 
-    if (!user || !user.isActive) {
+    if (!user || !user.isActive || payload.ver !== user.tokenVersion) {
       throw new UnauthorizedException();
     }
 
     return {
       userId: user.id,
       username: user.username,
-      name: user.name,
+      fullName: user.fullName,
       role: user.role,
       isActive: user.isActive,
-      // Either source restricts: a token issued for a temporary password stays
-      // restricted after the change, and a later admin reset applies to tokens
-      // that are already out. A token without the claim is restricted too.
-      mustChangePassword:
-        user.mustChangePassword || payload.mustChangePassword !== false,
+      mustChangePassword: user.mustChangePassword,
     };
   }
 }

@@ -21,32 +21,74 @@ enum Role {
   ADMIN
 }
 
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
 //====================================================
 // ENTITIES
 //====================================================
 
 model User {
-  id                 String     @id @default(uuid())
-  username           String     @unique
-  name               String
+  id                 String   @id @default(uuid())
+  dni                String   @unique
+  username           String   @unique
+  fullName           String
   password           String
-  role               Role       @default(USER)
-  isActive           Boolean    @default(true)
-  mustChangePassword Boolean    @default(true)
+  role               Role     @default(USER)
+  isActive           Boolean  @default(true)
+  mustChangePassword Boolean  @default(true)
+  // Carried in every JWT; incrementing it revokes all tokens already issued.
+  tokenVersion       Int      @default(0)
+  createdAt          DateTime @default(now())
+
   // RELATIONSHIPS
-  Register           Register[]
+  createdRecords Record[]   @relation("RecordCreatedBy")
+  updatedRecords Record[]   @relation("RecordUpdatedBy")
+  auditLogs      AuditLog[]
 }
 
-// NOTE: field names/shape are intentionally unchanged in Phase 0.
-// Phase 2 reshapes this into the `Record` model defined in CLAUDE.md §3.1.
-model Register {
-  id          String   @id @default(uuid())
+// One row per document movement: `ex` is intentionally NOT unique.
+model Record {
+  id          String    @id @default(uuid())
+  date        DateTime  @db.Date
   ex          String
-  if_code     String
-  motivo      String
-  reparticion String
-  pase        String
-  dia         DateTime
-  user        User     @relation(fields: [user_id], references: [id])
-  user_id     String
+  ifCode      String
+  subject     String
+  department  String
+  forwarding  String?
+  createdById String
+  updatedById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  // Soft delete: rows are never removed.
+  deletedAt   DateTime?
+
+  // RELATIONSHIPS
+  createdBy User       @relation("RecordCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedBy User?      @relation("RecordUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+  auditLogs AuditLog[]
+
+  @@index([ex])
+  @@index([ifCode])
+  @@index([date, createdAt])
+}
+
+// Append-only. A database trigger (see migrations) rejects UPDATE and DELETE.
+model AuditLog {
+  id            String      @id @default(uuid())
+  recordId      String
+  action        AuditAction
+  performedById String
+  before        Json?
+  after         Json?
+  createdAt     DateTime    @default(now())
+
+  // RELATIONSHIPS
+  record      Record @relation(fields: [recordId], references: [id], onDelete: Restrict)
+  performedBy User   @relation(fields: [performedById], references: [id], onDelete: Restrict)
+
+  @@index([recordId, createdAt])
 }

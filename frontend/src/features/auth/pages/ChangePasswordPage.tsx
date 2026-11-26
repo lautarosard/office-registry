@@ -1,28 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { isAxiosError } from 'axios';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../../shared/components/Button';
-import { Input } from '../../../shared/components/Input';
+import { Input } from '../../../shared/components/Field';
+import { apiErrorMessage } from '../../../shared/utils/api-error';
 import { useAuth } from '../hooks/useAuth';
 import {
   changePasswordSchema,
   PASSWORD_MIN_LENGTH,
   type ChangePasswordForm,
 } from '../utils/change-password.schema';
-
-function serverErrorMessage(err: unknown): string {
-  if (isAxiosError<{ message?: string | string[] }>(err)) {
-    if (!err.response) return 'No se pudo conectar con el servidor.';
-    const { status, data } = err.response;
-    // 400 and 429 messages are already user-facing Spanish.
-    if ((status === 400 || status === 429) && data?.message) {
-      return [data.message].flat().join(' ');
-    }
-  }
-  return 'No se pudo cambiar la contraseña. Intente nuevamente.';
-}
 
 export const ChangePasswordPage = () => {
   const { user, mustChangePassword, changePassword, logout } = useAuth();
@@ -48,9 +36,14 @@ export const ChangePasswordPage = () => {
     setServerError('');
     try {
       await changePassword({ currentPassword, newPassword });
-      navigate('/dashboard', { replace: true });
+      navigate('/expedientes', { replace: true });
     } catch (err) {
-      setServerError(serverErrorMessage(err));
+      setServerError(
+        apiErrorMessage(
+          err,
+          'No se pudo cambiar la contraseña. Intente nuevamente.',
+        ),
+      );
     }
   };
 
@@ -63,7 +56,9 @@ export const ChangePasswordPage = () => {
         {mustChangePassword
           ? 'Debe definir una contraseña propia antes de continuar.'
           : 'Actualice la contraseña de su cuenta.'}
-        {user && <span className="mt-1 block font-semibold">{user.name}</span>}
+        {user && (
+          <span className="mt-1 block font-semibold">{user.fullName}</span>
+        )}
       </p>
 
       <form
@@ -124,7 +119,7 @@ export const ChangePasswordPage = () => {
           </button>
         ) : (
           <Link
-            to="/dashboard"
+            to="/expedientes"
             className="text-red-700 underline underline-offset-4"
           >
             Cancelar

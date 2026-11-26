@@ -48,7 +48,7 @@ export class AuthController {
     return {
       id: user.userId,
       username: user.username,
-      name: user.name,
+      fullName: user.fullName,
       role: user.role,
       isActive: user.isActive,
       mustChangePassword: user.mustChangePassword,

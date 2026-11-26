@@ -1,13 +1,17 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Role } from '@prisma/client';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import type { AuthenticatedUser } from '../../modules/auth/application/strategies/jwt.strategy';
 
 /**
- * Compares the role carried in the JWT (a Prisma `Role` value) against the
- * roles declared with @Roles(). Both sides use the same enum, so the check
- * is a direct equality — no string mapping.
+ * Compares the user's current role (read from the DB by JwtStrategy) against
+ * the roles declared with @Roles().
  */
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -26,6 +30,8 @@ export class RolesGuard implements CanActivate {
       .getRequest<{ user?: AuthenticatedUser }>();
     const role = request.user?.role;
 
-    return role !== undefined && requiredRoles.includes(role);
+    if (role !== undefined && requiredRoles.includes(role)) return true;
+
+    throw new ForbiddenException('No tiene permisos para esta acción.');
   }
 }

@@ -1,22 +1,9 @@
 import { Module } from '@nestjs/common';
-import { RecordController } from './api/controllers/record.controller';
-import { IRecordService } from './application/interfaces/irecord.service';
-import { RecordService } from './application/services/record.service';
-import { IRecordRepository } from './domain/iRepository/irecord.repository';
-import { PrismaRecordRepository } from './infrastructure/persistance/prisma-record.repository';
+import { RecordsController } from './records.controller';
+import { RecordsService } from './records.service';
 
 @Module({
-  controllers: [RecordController],
-  providers: [
-    {
-      provide: IRecordService,
-      useClass: RecordService,
-    },
-    {
-      provide: IRecordRepository,
-      useClass: PrismaRecordRepository,
-    },
-  ],
-  exports: [IRecordService, IRecordRepository],
+  controllers: [RecordsController],
+  providers: [RecordsService],
 })
-export class RecordModule {}
+export class RecordsModule {}

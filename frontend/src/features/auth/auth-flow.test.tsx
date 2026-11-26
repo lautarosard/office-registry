@@ -15,11 +15,21 @@ import type { User } from './types';
 vi.mock('./services/auth.service', () => ({
   authService: { login: vi.fn(), me: vi.fn(), changePassword: vi.fn() },
 }));
+vi.mock('../records/records.api', () => ({
+  recordsApi: {
+    list: vi.fn(() =>
+      Promise.resolve({
+        data: [],
+        meta: { total: 0, page: 1, pageSize: 20, totalPages: 0 },
+      }),
+    ),
+  },
+}));
 
 const user: User = {
   id: '1',
   username: 'jperez',
-  name: 'Juana Pérez',
+  fullName: 'Juana Pérez',
   role: 'ADMIN',
   isActive: true,
   mustChangePassword: false,
@@ -35,7 +45,7 @@ const type = (label: string, value: string) =>
 
 describe('authentication flow', () => {
   beforeEach(() => {
-    vi.resetAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
     window.localStorage.clear();
   });
@@ -43,7 +53,7 @@ describe('authentication flow', () => {
   afterEach(cleanup);
 
   it('sends a visitor without a session to the login page', async () => {
-    open('/dashboard');
+    open('/expedientes');
 
     expect(await screen.findByText('INICIAR SESIÓN')).toBeTruthy();
     expect(authService.me).not.toHaveBeenCalled();
@@ -53,7 +63,7 @@ describe('authentication flow', () => {
     storage.setToken('stored');
     vi.mocked(authService.me).mockResolvedValue(user);
 
-    open('/dashboard');
+    open('/expedientes');
 
     expect(await screen.findByText('Juana Pérez')).toBeTruthy();
     expect(screen.getByText('Administrador')).toBeTruthy();
@@ -70,7 +80,7 @@ describe('authentication flow', () => {
       mustChangePassword: false,
     });
 
-    open('/dashboard');
+    open('/expedientes');
 
     expect(
       await screen.findByText(
@@ -84,7 +94,7 @@ describe('authentication flow', () => {
     type('Repetir nueva contraseña', 'Definitiva456');
     fireEvent.click(screen.getByRole('button', { name: 'Confirmar' }));
 
-    await waitFor(() => expect(window.location.pathname).toBe('/dashboard'));
+    await waitFor(() => expect(window.location.pathname).toBe('/expedientes'));
     expect(authService.changePassword).toHaveBeenCalledWith({
       currentPassword: 'Inicial123',
       newPassword: 'Definitiva456',

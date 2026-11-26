@@ -3,7 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../../../shared/components/Button';
-import { Input } from '../../../shared/components/Input';
+import { Input } from '../../../shared/components/Field';
 
 function loginErrorMessage(err: unknown): string {
   if (isAxiosError(err)) {
@@ -26,7 +26,7 @@ export const LoginPage = () => {
 
   const from =
     (location.state as { from?: { pathname?: string } } | null)?.from
-      ?.pathname || '/dashboard';
+      ?.pathname || '/expedientes';
 
   // Also covers a successful submit. ProtectedRoute then sends users with a
   // pending password change to /change-password.

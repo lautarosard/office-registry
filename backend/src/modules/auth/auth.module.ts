@@ -5,7 +5,6 @@ import { JwtModule, type JwtSignOptions } from '@nestjs/jwt';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthService } from './application/services/auth.service';
 import { AuthController } from './api/controllers/auth.controller';
-import { UserModule } from '../users/users.module';
 import { JwtStrategy } from './application/strategies/jwt.strategy';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { MustChangePasswordGuard } from '../../common/guards/must-change-password.guard';
@@ -13,7 +12,6 @@ import type { EnvVars } from '../../config/env.validation';
 
 @Module({
   imports: [
-    UserModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService<EnvVars, true>) => ({
